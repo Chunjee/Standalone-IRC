@@ -2,6 +2,7 @@
 
 #Include %A_ScriptDir%\Functions\
 ;Modular Functions
+#include inireadwrite.ahk
 #Include tts.ahk
 ;Application Specific
 ;None
@@ -14,8 +15,8 @@ If (A_IsUnicode OR AVer <= 104805) {
 	MsgBox This Script Is Only Compatible with AHK_L ANSI. Program Will Now Exit.
 	ExitApp
 }
-FileCreateDir, %A_ScriptDir%\Extras
-SetWorkingDir, %A_ScriptDir%\Extras
+FileCreateDir, %A_ScriptDir%\Data\
+SetWorkingDir, %A_ScriptDir%\Data\
 SetBatchLines, -1
 OnExit, ExitSub
 If !FileExist("redbutton.ico")
@@ -27,27 +28,27 @@ If !FileExist("grad.png")
 ChanCounter := 0, Version_Number := 1.115
 Check_ForUpdate(0)
 
-Gui, 80: +LastFound
-Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
-Gui, 80: Add, Button, x643 y474 w50 h20 gSendText vSender +Default, Send
-Gui, 80: Add, CheckBox, x703 y474 w100 h20 Checked1 gSwitchTTSOnOff, Enable TTS
-;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
-
 Fn_GlobalVars()
 IniRead, ReadDefName, IRC.ini, User, Name
 IniRead, ReadDefChan, IRC.ini, User, Channel
-AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
-Gui, 81: Add, Picture, x0 y0 h190 w280 0x4000000, grad.png
-Gui, 81: Font, s12, Arial
-Gui, 81: Add, Text, Center W270 yp+20 x5 +BackgroundTrans, Desired NickName
-Gui, 81: Add, Edit, vNickName W150 yp+20 xp+60, %ReadDefName%
-Gui, 81: Add, Text, Center W270 yp+30 x5 +BackgroundTrans, Channel To Join
-Gui, 81: Add, Edit, vChannel1 W150 yp+20 xp+60, %ReadDefChan%
-Gui, 81: Add, Button, +BackgroundTrans +Default xm h40 xm y+20 w90 -Wrap hwndhBtn, Join
-  ILButton(hbtn, "favicon (1).ico", 32, 32, "left")
+
+Gui, 80: +LastFound
+Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
+Gui, 80: Add, Button, x643 y474 w50 h20 gSendText vSender +Default, Send
+Gui, 80: Add, CheckBox, x703 y474 w40 h20 Checked1 gToggleTTS,TTS
+Gui, 80: Add, CheckBox, x763 y474 w70 h20 Checked1 gToggleTimeStamp, Timestamp
+;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
+
+Fn_BuildUserNameWindow()
+
+	If(ReadDefName = "") {
+	
+	}
+
+
+
 81GuiShow:
 Gui, 81: Show, w280 h190
-
 Return
 81GuiClose:
 ExitApp
@@ -58,9 +59,9 @@ If (NickName = "" or Channel1 = "")
 Channel1 := (SubStr(Channel1, 1, 1) = "#") ? Channel1 : "#" Channel1
 IniWrite, %NickName%, IRC.ini, User, Name
 IniWrite, %Channel1%, IRC.ini, User, Channel
-Menu, ChatOps, Add, &Add Channel, AddChan
-Menu, MyMenuBar, Add, &Options, :ChatOps
-Gui, 80: Menu, mymenubar
+;Menu, ChatOps, Add, &Add Channel, AddChan
+;Menu, MyMenuBar, Add, &Options, :ChatOps
+;Gui, 80: Menu, mymenubar
 GoTo, ContinueChat	;Skip The Label Below
 
 AddChan:
@@ -269,12 +270,16 @@ Else If (SubStr(TextBox, 1, 3) = "/me"){
 	GuiControl, 80: , TextBox
 	Return
 }
-	If (TTS_Toggle = 1) {
+	If (Settings_TTS = 1) {
 	Fn_TTS(AnnaVoice, "Speak", TextBox)
 	}
 MSG(Channel%CurrentTabNum%, TextBox)
 RichEdit_SetSel(%CurrentUserTab%, -1,-1)
-RichEdit_SetText(%CurrentUserTab%, "[" A_Hour ":" A_Min "] <" WantNick "> " TextBox "`r`n", "SELECTION", -1)
+	If (Settings_TimeStamp = 1) {
+	RichEdit_SetText(%CurrentUserTab%, "[" A_Hour ":" A_Min "] " WantNick ": " TextBox "`r`n", "SELECTION", -1)
+	} Else {
+	RichEdit_SetText(%CurrentUserTab%, WantNick ": " TextBox "`r`n", "SELECTION", -1)
+	}
 ScrollPos := RichEdit_ScrollPos(Chat%CurrentTabNum%)
 If (ScrollPos != "0/0")
 	RichEdit_ShowScrollBar(Chat%CurrentTabNum%, "V", True)
@@ -606,8 +611,13 @@ Message_Recieved(Message)
 				If (SubStr(Message, 1, InStr(Message, A_Space) -1) = Chr(1) "ACTION")
 					RichEdit_SetText(Chat%CurrentTabNum%, "  *  " Who "  " SubStr(Message, Instr(Message, A_Space)+1, Instr(Message, Chr(1), False, 1, 2)-Instr(Message, A_Space)-1) "`r`n", "SELECTION", -1)
 				Else{
+					;All regular chat messages are handled here. Checking for TimeStamp and TTS. Could be improved with separate function?
+					If (Settings_TimeStamp = 1) {
 					RichEdit_SetText(Chat%CurrentTabNum%, "[" A_Hour ":" A_Min "] " Who ": " Message "`r`n", "SELECTION", -1)
-					If (TTS_Toggle = 1) {
+					} Else {
+					RichEdit_SetText(Chat%CurrentTabNum%, Who ": " Message "`r`n", "SELECTION", -1)
+					}
+					If (Settings_TTS = 1) {
 					Fn_TTS(AnnaVoice, "Speak", Message)
 					}
 				}
@@ -704,17 +714,28 @@ If InStr(CurrentTabList, ButtonToDelete) {
 Return
 
 
-SwitchTTSOnOff:
-If (TTS_Toggle = 1)
+ToggleTTS:
+If (Settings_TTS = 1)
 {
-TTS_Toggle = 0
+Settings_TTS = 0
 }
 else
 {
-TTS_Toggle = 1
+Settings_TTS = 1
 }
 Return
 
+
+ToggleTimeStamp:
+If (Settings_TimeStamp = 1)
+{
+Settings_TimeStamp = 0
+}
+else
+{
+Settings_TimeStamp = 1
+}
+Return
 
 
 
@@ -723,7 +744,23 @@ Fn_GlobalVars()
 {
 global
 
-TTS_Toggle = 1
+Settings_TTS = 1
+Settings_TimeStamp = 1
+AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
+}
+
+Fn_BuildUserNameWindow()
+{
+global
+
+;Gui, 81: Add, Picture, x0 y0 h190 w280 0x4000000, grad.png
+Gui, 81: Font, s12, Arial
+Gui, 81: Add, Text, Center W270 yp+20 x5 +BackgroundTrans, Desired NickName
+Gui, 81: Add, Edit, vNickName W150 yp+20 xp+60, %ReadDefName%
+Gui, 81: Add, Text, Center W270 yp+30 x5 +BackgroundTrans, Channel To Join
+Gui, 81: Add, Edit, vChannel1 W150 yp+20 xp+60, %ReadDefChan%
+Gui, 81: Add, Button, +BackgroundTrans +Default xm h40 xm y+20 w90 -Wrap hwndhBtn, Join
+  ILButton(hbtn, "", 32, 32, "left")
 }
 
 OMF(Socket, Data)
