@@ -29,9 +29,11 @@ Check_ForUpdate(0)
 
 Gui, 80: +LastFound
 Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
-Gui, 80: Add, Button, x643 y474 w30 w20 gSendText vSender +Default, Send
+Gui, 80: Add, Button, x643 y474 w50 h20 gSendText vSender +Default, Send
+Gui, 80: Add, CheckBox, x703 y474 w100 h20 Checked1 gSwitchTTSOnOff, Enable TTS
 ;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
 
+Fn_GlobalVars()
 IniRead, ReadDefName, IRC.ini, User, Name
 IniRead, ReadDefChan, IRC.ini, User, Channel
 AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
@@ -267,7 +269,9 @@ Else If (SubStr(TextBox, 1, 3) = "/me"){
 	GuiControl, 80: , TextBox
 	Return
 }
-Fn_TTS(AnnaVoice, "Speak", TextBox)
+	If (TTS_Toggle = 1) {
+	Fn_TTS(AnnaVoice, "Speak", TextBox)
+	}
 MSG(Channel%CurrentTabNum%, TextBox)
 RichEdit_SetSel(%CurrentUserTab%, -1,-1)
 RichEdit_SetText(%CurrentUserTab%, "[" A_Hour ":" A_Min "] <" WantNick "> " TextBox "`r`n", "SELECTION", -1)
@@ -603,7 +607,9 @@ Message_Recieved(Message)
 					RichEdit_SetText(Chat%CurrentTabNum%, "  *  " Who "  " SubStr(Message, Instr(Message, A_Space)+1, Instr(Message, Chr(1), False, 1, 2)-Instr(Message, A_Space)-1) "`r`n", "SELECTION", -1)
 				Else{
 					RichEdit_SetText(Chat%CurrentTabNum%, "[" A_Hour ":" A_Min "] " Who ": " Message "`r`n", "SELECTION", -1)
+					If (TTS_Toggle = 1) {
 					Fn_TTS(AnnaVoice, "Speak", Message)
+					}
 				}
 			}
 		}
@@ -696,6 +702,29 @@ If InStr(CurrentTabList, ButtonToDelete) {
 		Gosub % "Button" CurrentTabNum + 1
 }
 Return
+
+
+SwitchTTSOnOff:
+If (TTS_Toggle = 1)
+{
+TTS_Toggle = 0
+}
+else
+{
+TTS_Toggle = 1
+}
+Return
+
+
+
+
+
+Fn_GlobalVars()
+{
+global
+
+TTS_Toggle = 1
+}
 
 OMF(Socket, Data)
 {
