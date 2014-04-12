@@ -2,10 +2,17 @@
 
 #Include %A_ScriptDir%\Functions\
 ;Modular Functions
-#include inireadwrite.ahk
 #Include tts.ahk
 ;Application Specific
 ;None
+
+;~~~~~~~~~~~~~~~~~~~~~
+;Important Admin Settings
+;~~~~~~~~~~~~~~~~~~~~~
+Channel1 = #ahk-bots-n-such
+ChanCounter := 0, Version_Number := 0.3
+Check_ForUpdate(0)
+
 
 
 ChatStartup:
@@ -15,22 +22,29 @@ If (A_IsUnicode OR AVer <= 104805) {
 	MsgBox This Script Is Only Compatible with AHK_L ANSI. Program Will Now Exit.
 	ExitApp
 }
-FileCreateDir, %A_ScriptDir%\Data\
-SetWorkingDir, %A_ScriptDir%\Data\
+FileCreateDir, %A_ScriptDir%\Data
+SetWorkingDir, %A_ScriptDir%\Data
 SetBatchLines, -1
 OnExit, ExitSub
-If !FileExist("redbutton.ico")
-   UrlDownloadToFile, http://www.autohotkey.net/~dylan904/redbutton.ico, redbutton.ico
-If !FileExist("favicon (1).ico")
-   UrlDownloadToFile, http://www.autohotkey.net/~dylan904/favicon (1).ico, favicon (1).ico
-If !FileExist("grad.png")
-   UrlDownloadToFile, http://www.autohotkey.net/~dylan904/grad.png, grad.png
-ChanCounter := 0, Version_Number := 1.115
-Check_ForUpdate(0)
+
 
 Fn_GlobalVars()
-IniRead, ReadDefName, IRC.ini, User, Name
-IniRead, ReadDefChan, IRC.ini, User, Channel
+IniRead, NickName, settings.ini, User, Name
+;IniRead, ReadDefChan, IRC.ini, User, Channel
+IniRead, Settings_TTS, settings.ini, Settings, TTS
+IniRead, Settings_TimeStamp, settings.ini, Settings, TimeStamp
+
+
+LoadSettings:
+
+	If !FileExist("settings.ini") {
+	NickName = 
+	Settings_TTS = 1
+	Settings_TimeStamp = 0
+	IniWrite, %NickName%, settings.ini, User, Name
+	IniWrite, %Settings_TTS%, settings.ini, Settings, TTS
+	IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
+	}
 
 Gui, 80: +LastFound
 Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
@@ -39,26 +53,33 @@ Gui, 80: Add, CheckBox, x703 y474 w40 h20 Checked1 gToggleTTS,TTS
 Gui, 80: Add, CheckBox, x763 y474 w70 h20 Checked1 gToggleTimeStamp, Timestamp
 ;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
 
-Fn_BuildUserNameWindow()
 
-	If(ReadDefName = "") {
-	
+
+Fn_BuildUserAndChannelWindow()
+	If(NickName = "" or NickName = ) {
+	GoTo, 81GuiShow
+	} Else {
+	GoTo, SettingsValidated
 	}
 
-
-
 81GuiShow:
-Gui, 81: Show, w280 h190
+Gui, 81: Show, w279 h159
 Return
 81GuiClose:
 ExitApp
 81ButtonJoin:
 Gui, 81: Submit
-If (NickName = "" or Channel1 = "")
+If (NickName = "" or NickName = or Channel1 = "")
 	GoTo, 81GuiShow
 Channel1 := (SubStr(Channel1, 1, 1) = "#") ? Channel1 : "#" Channel1
-IniWrite, %NickName%, IRC.ini, User, Name
-IniWrite, %Channel1%, IRC.ini, User, Channel
+
+SettingsValidated:
+IniWrite, %NickName%, settings.ini, User, Name
+;IniWrite, %Channel1%, settings.ini, User, Channel
+IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TTS
+IniWrite, %Settings_TTS%, settings.ini, Settings, TimeStamp
+
+
 ;Menu, ChatOps, Add, &Add Channel, AddChan
 ;Menu, MyMenuBar, Add, &Options, :ChatOps
 ;Gui, 80: Menu, mymenubar
@@ -749,18 +770,18 @@ Settings_TimeStamp = 1
 AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
 }
 
-Fn_BuildUserNameWindow()
+Fn_BuildUserAndChannelWindow()
 {
 global
 
 ;Gui, 81: Add, Picture, x0 y0 h190 w280 0x4000000, grad.png
+Gui, 81: Font, s14, Arial
+Gui, 81: Add, Text, x12 y10 w250 h40 +Center +BackgroundTrans, Set Username Forever
+Gui, 81: Add, Edit, vNickName x62 y60 w150 h40 +Center,
+;Gui, 81: Add, Text, Center W270 yp+30 x5 +BackgroundTrans, Channel To Join
+;Gui, 81: Add, Edit, vChannel1 W150 yp+20 xp+60, %ReadDefChan%
 Gui, 81: Font, s12, Arial
-Gui, 81: Add, Text, Center W270 yp+20 x5 +BackgroundTrans, Desired NickName
-Gui, 81: Add, Edit, vNickName W150 yp+20 xp+60, %ReadDefName%
-Gui, 81: Add, Text, Center W270 yp+30 x5 +BackgroundTrans, Channel To Join
-Gui, 81: Add, Edit, vChannel1 W150 yp+20 xp+60, %ReadDefChan%
-Gui, 81: Add, Button, +BackgroundTrans +Default xm h40 xm y+20 w90 -Wrap hwndhBtn, Join
-  ILButton(hbtn, "", 32, 32, "left")
+Gui, 81: Add, Button, x92 y110 w90 h40 , Join
 }
 
 OMF(Socket, Data)
