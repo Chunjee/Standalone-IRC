@@ -1,5 +1,12 @@
 #SingleInstance Force
 
+#Include %A_ScriptDir%\Functions\
+;Modular Functions
+#Include tts.ahk
+;Application Specific
+;None
+
+
 ChatStartup:
 Loop, Parse, A_AhkVersion, `.
 	AVer .= A_LoopField
@@ -18,16 +25,16 @@ If !FileExist("favicon (1).ico")
 If !FileExist("grad.png")
    UrlDownloadToFile, http://www.autohotkey.net/~dylan904/grad.png, grad.png
 ChanCounter := 0, Version_Number := 1.115
-Check_ForUpdate(1)
+Check_ForUpdate(0)
 
 Gui, 80: +LastFound
 Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
 Gui, 80: Add, Button, x643 y474 w30 w20 gSendText vSender +Default, Send
-Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
+;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
 
 IniRead, ReadDefName, IRC.ini, User, Name
 IniRead, ReadDefChan, IRC.ini, User, Channel
-
+AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
 Gui, 81: Add, Picture, x0 y0 h190 w280 0x4000000, grad.png
 Gui, 81: Font, s12, Arial
 Gui, 81: Add, Text, Center W270 yp+20 x5 +BackgroundTrans, Desired NickName
@@ -260,7 +267,7 @@ Else If (SubStr(TextBox, 1, 3) = "/me"){
 	GuiControl, 80: , TextBox
 	Return
 }
-
+Fn_TTS(AnnaVoice, "Speak", TextBox)
 MSG(Channel%CurrentTabNum%, TextBox)
 RichEdit_SetSel(%CurrentUserTab%, -1,-1)
 RichEdit_SetText(%CurrentUserTab%, "[" A_Hour ":" A_Min "] <" WantNick "> " TextBox "`r`n", "SELECTION", -1)
@@ -594,8 +601,10 @@ Message_Recieved(Message)
 				RichEdit_SetSel(Chat%CurrentTabNum%, -1,-1)
 				If (SubStr(Message, 1, InStr(Message, A_Space) -1) = Chr(1) "ACTION")
 					RichEdit_SetText(Chat%CurrentTabNum%, "  *  " Who "  " SubStr(Message, Instr(Message, A_Space)+1, Instr(Message, Chr(1), False, 1, 2)-Instr(Message, A_Space)-1) "`r`n", "SELECTION", -1)
-				Else
-					RichEdit_SetText(Chat%CurrentTabNum%, "[" A_Hour ":" A_Min "] <" Who "> " Message "`r`n", "SELECTION", -1)
+				Else{
+					RichEdit_SetText(Chat%CurrentTabNum%, "[" A_Hour ":" A_Min "] " Who ": " Message "`r`n", "SELECTION", -1)
+					Fn_TTS(AnnaVoice, "Speak", Message)
+				}
 			}
 		}
 		SendMessage, 0x115, 7, 0,, % "ahk_id " Chat%DirNum%
