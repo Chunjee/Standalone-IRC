@@ -166,7 +166,7 @@ ListView_HeaderFontSet(hwndListView5, "b")
 ListView_HeaderFontSet(hwndListView6, "b")
 ListView_HeaderFontSet(hwndListView7, "b")
 ListView_HeaderFontSet(hwndListView8, "b")
-Gui, 80: Show,, %Program_Label% - %WantNick% "   "
+Gui, 80: Show,, %Program_Label% - %WantNick%
 WinGet, 80PID, PID, %Program_Label% - %WantNick%
 GuiControl, 80: Disable, Sender
 CurrTextLen := RichEdit_GetTextLength(Chat1)
@@ -423,7 +423,7 @@ Message_Recieved(Message)
     Else If(Message2 = 001) {
 		If (WantNick != Message3) And InStr(Message3, WantNick) {
 			WantNick := Message3, NickName := Message3
-			WinSetTitle, LoneIRC,, LoneIRC - %WantNick%
+			WinSetTitle, %Program_Label%,, %Program_Label% - %WantNick%
 		}
 	}
     Else If (Message2 = 433){
@@ -505,14 +505,14 @@ Message_Recieved(Message)
 						Gui, 80: ListView, OnlineUsers%A_Index%
 						FoundTab := True, T%A_Index% := (v332) ? HoldTopic : "No Topic Set"
 						If (CurrentTabNum = A_Index)
-							WinSetTitle, LoneIRC,, % "LoneIRC - " WantNick " [" T%A_Index% "]"
+							WinSetTitle, %Program_Label%,, % "IRC - " WantNick " [" T%A_Index% "]"
 						break
 					}
 					Else If (ControlAH = SubStr(ChosenUser, 2)){
 						Gui, 80: ListView, OnlineUsers%A_Index%
 						FoundTab := True, T%A_Index% := (v332) ? HoldTopic : "No Topic Set"
 						If (CurrentTabNum = A_Index)
-							WinSetTitle, LoneIRC,, % "LoneIRC - " WantNick " [" T%A_Index% "]"
+							WinSetTitle, %Program_Label%,, % "IRC - " WantNick " [" T%A_Index% "]"
 						break
 					}
 				} 
@@ -703,7 +703,7 @@ button5:
 button6:
 button7:
 CurrentTabNum := SubStr(A_ThisLabel, 0)
-WinSetTitle, LoneIRC,, % "LoneIRC - " WantNick " [" T%CurrentTabNum% "]"
+WinSetTitle, %Program_Label%,, % "IRC - " WantNick " [" T%CurrentTabNum% "]"
 If (CurrentTabNum != PrevTabNum){
 	Control, Hide,,, % "ahk_id " %CurrentUserTab%
 	GuiControl, 80: Hide, OnlineUsers%PrevTabNum%
