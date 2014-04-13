@@ -9,6 +9,7 @@
 ;~~~~~~~~~~~~~~~~~~~~~
 ;Important Admin Settings
 ;~~~~~~~~~~~~~~~~~~~~~
+Program_Label = Chat
 Channel1 = #ahk-bots-n-such
 Channel_Label = Chat
 ChanCounter := 0, Version_Number := 0.3
@@ -165,8 +166,8 @@ ListView_HeaderFontSet(hwndListView5, "b")
 ListView_HeaderFontSet(hwndListView6, "b")
 ListView_HeaderFontSet(hwndListView7, "b")
 ListView_HeaderFontSet(hwndListView8, "b")
-Gui, 80: Show,, LoneIRC - %WantNick%
-WinGet, 80PID, PID, LoneIRC - %WantNick%
+Gui, 80: Show,, %Program_Label% - %WantNick% "   "
+WinGet, 80PID, PID, %Program_Label% - %WantNick%
 GuiControl, 80: Disable, Sender
 CurrTextLen := RichEdit_GetTextLength(Chat1)
 RichEdit_SetText(Chat1, "==  Connecting.", "SELECTION", -1)
@@ -1103,6 +1104,7 @@ else
 {
 Settings_TTS = 1
 }
+IniWrite, %Settings_TTS%, settings.ini, Settings, TTS
 Return
 
 
@@ -1115,6 +1117,7 @@ else
 {
 Settings_TimeStamp = 1
 }
+IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
 Return
  
 ;************************
