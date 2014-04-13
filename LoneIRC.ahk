@@ -10,6 +10,7 @@
 ;Important Admin Settings
 ;~~~~~~~~~~~~~~~~~~~~~
 Channel1 = #ahk-bots-n-such
+Channel_Label = Chat
 ChanCounter := 0, Version_Number := 0.3
 Check_ForUpdate(0)
 
@@ -46,12 +47,7 @@ LoadSettings:
 	IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
 	}
 
-Gui, 80: +LastFound
-Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
-Gui, 80: Add, Button, x643 y474 w50 h20 gSendText vSender +Default, Send
-Gui, 80: Add, CheckBox, x703 y474 w40 h20 Checked1 gToggleTTS,TTS
-Gui, 80: Add, CheckBox, x763 y474 w70 h20 Checked1 gToggleTimeStamp, Timestamp
-;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
+
 
 
 
@@ -76,8 +72,28 @@ Channel1 := (SubStr(Channel1, 1, 1) = "#") ? Channel1 : "#" Channel1
 SettingsValidated:
 IniWrite, %NickName%, settings.ini, User, Name
 ;IniWrite, %Channel1%, settings.ini, User, Channel
-IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TTS
-IniWrite, %Settings_TTS%, settings.ini, Settings, TimeStamp
+IniWrite, %Settings_TTS%, settings.ini, Settings, TTS
+IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
+
+
+
+;All settings validated and saved. Build main GUI
+Gui, 80: +LastFound
+Gui, 80: Add, Edit, x10 y475 w630 vTextBox gCancelTabbing -WantReturn
+Gui, 80: Add, Button, x643 y474 w50 h20 gSendText vSender +Default, Send
+	If (Settings_TimeStamp = 1) {
+	Gui, 80: Add, CheckBox, x703 y474 w40 h20 Checked gToggleTTS,TTS
+	} Else {
+	Gui, 80: Add, CheckBox, x703 y474 w40 h20 gToggleTTS,TTS
+	}
+
+	If (Settings_TimeStamp = 1) {
+	Gui, 80: Add, CheckBox, x763 y474 w70 h20 Checked gToggleTimeStamp, Timestamp
+	} Else {
+	Gui, 80: Add, CheckBox, x763 y474 w70 h20 gToggleTimeStamp, Timestamp
+	}
+
+;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
 
 
 ;Menu, ChatOps, Add, &Add Channel, AddChan
@@ -735,41 +751,6 @@ If InStr(CurrentTabList, ButtonToDelete) {
 Return
 
 
-ToggleTTS:
-If (Settings_TTS = 1)
-{
-Settings_TTS = 0
-}
-else
-{
-Settings_TTS = 1
-}
-Return
-
-
-ToggleTimeStamp:
-If (Settings_TimeStamp = 1)
-{
-Settings_TimeStamp = 0
-}
-else
-{
-Settings_TimeStamp = 1
-}
-Return
-
-
-
-
-Fn_GlobalVars()
-{
-global
-
-Settings_TTS = 1
-Settings_TimeStamp = 1
-AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
-}
-
 Fn_BuildUserAndChannelWindow()
 {
 global
@@ -1095,14 +1076,46 @@ A_SendMessage(p_msg, p_wParam="", p_lParam="", p_ctrl="", p_title="", p_text="",
 	SendMessage, p_msg, p_wParam, p_lParam, %p_ctrl%, %p_title%, %p_text%, %p_excludetitle%, %p_excludetext%
 	return errorlevel
 }
-;//******************* /Functions *******************
+
+;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
+; FUNCTIONS
+;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
 
 ControlFocused()
 {
     ControlGetFocus, Control, A
     Return Control
 }
- 
+
+Fn_GlobalVars()
+{
+global
+
+AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
+}
+
+ToggleTTS:
+If (Settings_TTS = 1)
+{
+Settings_TTS = 0
+}
+else
+{
+Settings_TTS = 1
+}
+Return
+
+
+ToggleTimeStamp:
+If (Settings_TimeStamp = 1)
+{
+Settings_TimeStamp = 0
+}
+else
+{
+Settings_TimeStamp = 1
+}
+Return
  
 ;************************
 ; Edit Control Functions
