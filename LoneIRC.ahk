@@ -1096,10 +1096,10 @@ Fn_TTSCheck(TTSVar)
 global
 
 	If (Settings_TTS = 1) {
-	
-	
-	
-	Fn_TTS(AnnaVoice, "Speak", TTSVar)
+		;If TTSVar does not contain http OR https
+		If !(InStr(TTSVar, "http") || (InStr(TTSVar, "https"))) {
+		Fn_TTS(AnnaVoice, "Speak", TTSVar)
+		}
 	}
 }
 
