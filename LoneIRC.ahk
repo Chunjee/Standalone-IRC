@@ -308,9 +308,7 @@ Else If (SubStr(TextBox, 1, 3) = "/me"){
 	GuiControl, 80: , TextBox
 	Return
 }
-	If (Settings_TTS = 1) {
-	Fn_TTS(AnnaVoice, "Speak", TextBox)
-	}
+Fn_TTSCheck(TextBox)
 MSG(Channel%CurrentTabNum%, TextBox)
 RichEdit_SetSel(%CurrentUserTab%, -1,-1)
 	If (Settings_TimeStamp = 1) {
@@ -396,7 +394,7 @@ Message_Recieved(Message)
 			RichEdit_SetText(Chat%QNum%, "==  NickName Is Already In Use: " Message4 "`r`n", "SELECTION", -1)
 		Else If (Message2 = "NICK" And SubStr(Message1, 2, Instr(Message1, "!") - 2) = WantNick) {
 			WantNick := SubStr(Message3, 2), NickName := WantNick, RichEdit_SetText(Chat%QNum%, "==  " SubStr(Message1, 2, Instr(Message1, "!") - 2) " has changed nick to " WantNick "`r`n", "SELECTION", -1)
-			IniWrite, %NickName%, IRC.ini, User, Name
+			IniWrite, %NickName%, settings.ini, User, Name
 			Gui, 80: Default
 			Loop, %UserTabCount% {
 				Gui, 80: ListView, OnlineUsers%A_Index%
@@ -655,9 +653,7 @@ Message_Recieved(Message)
 					} Else {
 					RichEdit_SetText(Chat%CurrentTabNum%, Who ": " Message "`r`n", "SELECTION", -1)
 					}
-					If (Settings_TTS = 1) {
-					Fn_TTS(AnnaVoice, "Speak", Message)
-					}
+					Fn_TTSCheck(Message)
 				}
 			}
 		}
@@ -1094,6 +1090,22 @@ global
 
 AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
 }
+
+Fn_TTSCheck(TTSVar)
+{
+global
+
+	If (Settings_TTS = 1) {
+	
+	
+	
+	Fn_TTS(AnnaVoice, "Speak", TTSVar)
+	}
+}
+
+
+
+
 
 ToggleTTS:
 If (Settings_TTS = 1)
