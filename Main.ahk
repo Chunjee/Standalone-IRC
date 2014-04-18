@@ -1098,10 +1098,11 @@ Fn_TTSCheck(TTSVar)
 global
 
 	If (Settings_TTS = 1) {
-		;If TTSVar does not contain http OR https
-		If !(InStr(TTSVar, "http") || (InStr(TTSVar, "https"))) {
+		;Cut http://*  or https://* out
+		TTSVar := RegexReplace(TTSVar, "\bhttps?:\/\/\S*\b", "")
+		
+		;Send to TTS
 		Fn_TTS(SelectedVoice, "Speak", TTSVar)
-		}
 	}
 }
 
