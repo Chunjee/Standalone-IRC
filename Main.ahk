@@ -10,6 +10,7 @@
 ;Important Admin Settings
 ;~~~~~~~~~~~~~~~~~~~~~
 Program_Label = Chat
+IRC_Network = irc.freenode.net
 Channel1 = #ahk-bots-n-such
 Channel_Label = Chat
 ChanCounter := 0, Version_Number := 0.3
@@ -180,7 +181,7 @@ RichEdit_SetSel(Chat1, -1, -1)
 RichEdit_SetCharFormat(Chat1, "Segoe", "s9", "0x000000", "", "Selection")
 DOTDOTDOT := 1, DotText := "Connecting"
 DOTDOTDOT("1", True)
-CONNECT(NickName, NickName, NickName, "", "irc.freenode.net", 6667)
+CONNECT(NickName, NickName, NickName, "", IRC_Network, 6667)
 ROMF("Message_Recieved")
 JOIN(Channel1)
 SetTimer, JOIN, 20000
@@ -438,7 +439,7 @@ Message_Recieved(Message)
     Else If ((Message2 = "QUIT") And (Message3 = ":Ping") And (Message4 = "timeout:")){
 		If (Who = WantNick) {
 			GuiControl, 80: Disable, Sender
-			CONNECT(NickName, NickName, NickName, "", "irc.freenode.net", 6667)
+			CONNECT(NickName, NickName, NickName, "", IRC_Network, 6667)
 			Loop, %UserTabCount% {
 				GuiControlGet, BT,, OnlineTab%A_Index%
 				If InStr(BT, "#"){
@@ -1171,8 +1172,6 @@ Return
 
 About:
 Msgbox, %Program_Label% v%Version_Number% by Chunjee - DownloadMob.com
-
-
 Return
 
 Quit:
@@ -2554,7 +2553,7 @@ __WSA_recv(wParam, lParam)
                 SetTimer, DOTDOTDOT, 1000
                 IfWinActive, Contractor Chat - %WantNick%
                     MsgBox, 4096, Lost Connection, Your connection has timed out. Please wait until reconnected to continute with chat.`r`nThis will take a moment.1
-                CONNECT(NickName, NickName, NickName, "", "irc.freenode.net", 6667)
+                CONNECT(NickName, NickName, NickName, "", IRC_Network, 6667)
                 JOIN(Channel)
                 ROMF("Message_Recieved")
             }
