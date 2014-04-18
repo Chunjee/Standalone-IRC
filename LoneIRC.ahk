@@ -31,11 +31,12 @@ OnExit, ExitSub
 
 
 Fn_GlobalVars()
-CreateArchiveDir()
+Path_Archive := CreateArchiveDir()
+FormatTime, Time_Day,, MM/dd
 IniRead, NickName, settings.ini, User, Name
-;IniRead, ReadDefChan, IRC.ini, User, Channel
 IniRead, Settings_TTS, settings.ini, Settings, TTS
 IniRead, Settings_TimeStamp, settings.ini, Settings, TimeStamp
+SetTimer, Hourly, 3600000 ;Creates Hourly Timer
 
 
 LoadSettings:
@@ -310,7 +311,7 @@ Else If (SubStr(TextBox, 1, 3) = "/me"){
 	Return
 }
 Fn_TTSCheck(TextBox)
-Fn_ChatLog(WantNick, TextBox)
+Fn_ChatLog(WantNick, TextBox, Path_Archive, Time_Day)
 MSG(Channel%CurrentTabNum%, TextBox)
 RichEdit_SetSel(%CurrentUserTab%, -1,-1)
 	If (Settings_TimeStamp = 1) {
@@ -656,7 +657,7 @@ Message_Recieved(Message)
 					RichEdit_SetText(Chat%CurrentTabNum%, Who ": " Message "`r`n", "SELECTION", -1)
 					}
 					Fn_TTSCheck(Message)
-					Fn_Chatlog(Who, Message)
+					Fn_Chatlog(Who, Message, Path_Archive, Time_Day)
 				}
 			}
 		}
@@ -1107,28 +1108,25 @@ global
 }
 
 
-Fn_Chatlog(LogNick, LogMessage)
+Fn_Chatlog(LogNick, LogMessage, LogDir, Day)
 {
-global
-
 FileAppend,
 (
-[%A_MM%/%A_DD% - %A_Hour%:%A_Min%] %LogNick%: %LogMessage%`n
-), %Path_Archive%\%A_DD%.txt
+[%Day%-%A_Hour%:%A_Min%] %LogNick%: %LogMessage%`n
+), %LogDir%.txt
 }
 
 CreateArchiveDir()
 {
-global
-
-CurrentDate = %A_Now%
-FormatTime, CurrentDate,, MMddyy
+;CurrentDate = %A_Now%
 FormatTime, CurrentYear,, yyyy
 FormatTime, CurrentMonth,, MM-MMMM
-FormatTime, CurrentDay,, dd
+FormatTime, CurrentDay,, dd-dddd
+FormatTime, Time_Day,, MM/dd
 
 FileCreateDir, %A_ScriptDir%\Data\Archive\%CurrentYear%\%CurrentMonth%\
-Path_Archive = %A_ScriptDir%\Data\Archive\%CurrentYear%\%CurrentMonth%\
+Path_Archive = %A_ScriptDir%\Data\Archive\%CurrentYear%\%CurrentMonth%\%CurrentDay%
+Return Path_Archive
 }
 
 ToggleTTS:
@@ -1155,7 +1153,13 @@ Settings_TimeStamp = 1
 }
 IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
 Return
- 
+
+
+Hourly:
+CreateArchiveDir()
+FormatTime, Time_Day,, MM/dd
+Return
+
 ;************************
 ; Edit Control Functions
 ;************************
