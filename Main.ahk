@@ -14,6 +14,7 @@ Channel1 = #ahk-bots-n-such
 Channel_Label = Chat
 ChanCounter := 0, Version_Number := 0.3
 Check_ForUpdate(0)
+Sb_Menu()
 
 
 
@@ -54,7 +55,7 @@ LoadSettings:
 
 
 
-Fn_BuildUserAndChannelWindow()
+Sb_BuildUserAndChannelWindow()
 	If(NickName = "" or NickName = ) {
 	GoTo, 81GuiShow
 	} Else {
@@ -752,7 +753,7 @@ If InStr(CurrentTabList, ButtonToDelete) {
 Return
 
 
-Fn_BuildUserAndChannelWindow()
+Sb_BuildUserAndChannelWindow()
 {
 global
 
@@ -1129,6 +1130,20 @@ Path_Archive = %A_ScriptDir%\Data\Archive\%CurrentYear%\%CurrentMonth%\%CurrentD
 Return Path_Archive
 }
 
+;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
+; Subs
+;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
+Sb_Menu()
+{
+Menu, Tray, NoStandard
+Menu, Tray, Add, About, About
+Menu, Tray, Add, Quit, Quit
+}
+
+
+;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
+; Labels
+;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
 ToggleTTS:
 If (Settings_TTS = 1)
 {
@@ -1154,7 +1169,18 @@ Settings_TimeStamp = 1
 IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
 Return
 
+About:
+Msgbox, %Program_Label% v%Version_Number% by Chunjee - DownloadMob.com
 
+
+Return
+
+Quit:
+ExitApp
+Return
+;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
+; Timers
+;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
 Hourly:
 CreateArchiveDir()
 FormatTime, Time_Day,, MM/dd
