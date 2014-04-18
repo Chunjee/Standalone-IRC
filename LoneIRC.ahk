@@ -31,6 +31,7 @@ OnExit, ExitSub
 
 
 Fn_GlobalVars()
+CreateArchiveDir()
 IniRead, NickName, settings.ini, User, Name
 ;IniRead, ReadDefChan, IRC.ini, User, Channel
 IniRead, Settings_TTS, settings.ini, Settings, TTS
@@ -166,7 +167,7 @@ ListView_HeaderFontSet(hwndListView5, "b")
 ListView_HeaderFontSet(hwndListView6, "b")
 ListView_HeaderFontSet(hwndListView7, "b")
 ListView_HeaderFontSet(hwndListView8, "b")
-Gui, 80: Show,, %Program_Label% - %WantNick%
+Gui, 80: Show,, %Program_Label%
 WinGet, 80PID, PID, %Program_Label% - %WantNick%
 GuiControl, 80: Disable, Sender
 CurrTextLen := RichEdit_GetTextLength(Chat1)
@@ -309,6 +310,7 @@ Else If (SubStr(TextBox, 1, 3) = "/me"){
 	Return
 }
 Fn_TTSCheck(TextBox)
+Fn_ChatLog(WantNick, TextBox)
 MSG(Channel%CurrentTabNum%, TextBox)
 RichEdit_SetSel(%CurrentUserTab%, -1,-1)
 	If (Settings_TimeStamp = 1) {
@@ -421,7 +423,7 @@ Message_Recieved(Message)
     Else If(Message2 = 001) {
 		If (WantNick != Message3) And InStr(Message3, WantNick) {
 			WantNick := Message3, NickName := Message3
-			WinSetTitle, %Program_Label%,, %Program_Label% - %WantNick%
+			WinSetTitle, %Program_Label%,, %Program_Label%
 		}
 	}
     Else If (Message2 = 433){
@@ -503,14 +505,14 @@ Message_Recieved(Message)
 						Gui, 80: ListView, OnlineUsers%A_Index%
 						FoundTab := True, T%A_Index% := (v332) ? HoldTopic : "No Topic Set"
 						If (CurrentTabNum = A_Index)
-							WinSetTitle, %Program_Label%,, % "IRC - " WantNick " [" T%A_Index% "]"
+							WinSetTitle, %Program_Label%,, %Program_Label%
 						break
 					}
 					Else If (ControlAH = SubStr(ChosenUser, 2)){
 						Gui, 80: ListView, OnlineUsers%A_Index%
 						FoundTab := True, T%A_Index% := (v332) ? HoldTopic : "No Topic Set"
 						If (CurrentTabNum = A_Index)
-							WinSetTitle, %Program_Label%,, % "IRC - " WantNick " [" T%A_Index% "]"
+							WinSetTitle, %Program_Label%,, %Program_Label% ;Formerly % "Chat - " WantNick " [" T%A_Index% "]"
 						break
 					}
 				} 
@@ -654,6 +656,7 @@ Message_Recieved(Message)
 					RichEdit_SetText(Chat%CurrentTabNum%, Who ": " Message "`r`n", "SELECTION", -1)
 					}
 					Fn_TTSCheck(Message)
+					Fn_Chatlog(Who, Message)
 				}
 			}
 		}
@@ -699,7 +702,7 @@ button5:
 button6:
 button7:
 CurrentTabNum := SubStr(A_ThisLabel, 0)
-WinSetTitle, %Program_Label%,, % "IRC - " WantNick " [" T%CurrentTabNum% "]"
+WinSetTitle, %Program_Label%,, %Program_Label% ; "IRC - " WantNick " [" T%CurrentTabNum% "]"
 If (CurrentTabNum != PrevTabNum){
 	Control, Hide,,, % "ahk_id " %CurrentUserTab%
 	GuiControl, 80: Hide, OnlineUsers%PrevTabNum%
@@ -1104,8 +1107,29 @@ global
 }
 
 
+Fn_Chatlog(LogNick, LogMessage)
+{
+global
 
+FileAppend,
+(
+[%A_MM%/%A_DD% - %A_Hour%:%A_Min%] %LogNick%: %LogMessage%`n
+), %Path_Archive%\%A_DD%.txt
+}
 
+CreateArchiveDir()
+{
+global
+
+CurrentDate = %A_Now%
+FormatTime, CurrentDate,, MMddyy
+FormatTime, CurrentYear,, yyyy
+FormatTime, CurrentMonth,, MM-MMMM
+FormatTime, CurrentDay,, dd
+
+FileCreateDir, %A_ScriptDir%\Data\Archive\%CurrentYear%\%CurrentMonth%\
+Path_Archive = %A_ScriptDir%\Data\Archive\%CurrentYear%\%CurrentMonth%\
+}
 
 ToggleTTS:
 If (Settings_TTS = 1)
