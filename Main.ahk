@@ -14,8 +14,8 @@ IRC_Network = irc.freenode.net
 Channel1 = #ahk-bots-n-such
 Channel_Label = Chat
 ChanCounter := 0, Version_Number := 0.3
-Check_ForUpdate(0)
-Sb_Menu()
+Fn_CheckForUpdate(0)
+Sb_Menu(Program_Label)
 
 
 
@@ -1134,9 +1134,23 @@ Return Path_Archive
 ;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
 ; Subs
 ;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
-Sb_Menu()
+Sb_Menu(TipLabel)
 {
+global
+
+Voice := ComObjCreate("SAPI.SpVoice")
+AllVoices := Fn_TTS(Voice, "GetVoices")
+Voice := ""
+
+Loop, parse, AllVoices, `n, `r
+{
+Menu, SpeachMenu, Add, %A_LoopField%, SelectedSpeach
+}
+
+Menu, Tray, Tip , %TipLabel%
 Menu, Tray, NoStandard
+Menu, Tray, Add, Choose TTS Voice, :SpeachMenu
+Menu, Tray, Add
 Menu, Tray, Add, About, About
 Menu, Tray, Add, Quit, Quit
 }
@@ -1168,6 +1182,10 @@ else
 Settings_TimeStamp = 1
 }
 IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
+Return
+
+SelectedSpeach:
+AnnaVoice := Fn_TTSCreateVoice(A_ThisMenuItem)
 Return
 
 About:
@@ -2757,7 +2775,7 @@ ILButton(HBtn, Images, Cx=16, Cy=16, Align="center", Margin="1 1 1 1") {
 ;----------------------------------------------------------------------------------------------------
 
    
-Check_ForUpdate(_ReplaceCurrentScript = 0, _SuppressMsgBox = 0, _CallbackFunction = "", ByRef _Information = "")
+Fn_CheckForUpdate(_ReplaceCurrentScript = 0, _SuppressMsgBox = 0, _CallbackFunction = "", ByRef _Information = "")
 {
     ;Version.ini file format
     ;
