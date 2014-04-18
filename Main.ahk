@@ -32,13 +32,12 @@ SetBatchLines, -1
 OnExit, ExitSub
 
 
-Fn_GlobalVars()
 Path_Archive := CreateArchiveDir()
 FormatTime, Time_Day,, MM/dd
 IniRead, NickName, settings.ini, User, Name
 IniRead, Settings_TTS, settings.ini, Settings, TTS
 IniRead, Settings_TimeStamp, settings.ini, Settings, TimeStamp
-SetTimer, Hourly, 3600000 ;Creates Hourly Timer
+IniRead, Settings_TTSVoice, settings.ini, Settings, TTSVoice
 
 
 LoadSettings:
@@ -47,12 +46,15 @@ LoadSettings:
 	NickName = 
 	Settings_TTS = 1
 	Settings_TimeStamp = 0
+	Settings_TTSVoice = Microsoft Anna
 	IniWrite, %NickName%, settings.ini, User, Name
 	IniWrite, %Settings_TTS%, settings.ini, Settings, TTS
 	IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
+	IniWrite, %Settings_TTSVoice%, settings.ini, Settings, TTSVoice
 	}
 
-
+Sb_GlobalVars()
+SetTimer, Hourly, 3600000 ;Creates Hourly Timer
 
 
 
@@ -1090,12 +1092,6 @@ ControlFocused()
     Return Control
 }
 
-Fn_GlobalVars()
-{
-global
-
-AnnaVoice := Fn_TTSCreateVoice("Microsoft Anna")
-}
 
 Fn_TTSCheck(TTSVar)
 {
@@ -1104,7 +1100,7 @@ global
 	If (Settings_TTS = 1) {
 		;If TTSVar does not contain http OR https
 		If !(InStr(TTSVar, "http") || (InStr(TTSVar, "https"))) {
-		Fn_TTS(AnnaVoice, "Speak", TTSVar)
+		Fn_TTS(SelectedVoice, "Speak", TTSVar)
 		}
 	}
 }
@@ -1134,6 +1130,13 @@ Return Path_Archive
 ;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
 ; Subs
 ;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
+Sb_GlobalVars()
+{
+global
+
+SelectedVoice := Fn_TTSCreateVoice(Settings_TTSVoice)
+}
+
 Sb_Menu(TipLabel)
 {
 global
@@ -1154,6 +1157,8 @@ Menu, Tray, Add
 Menu, Tray, Add, About, About
 Menu, Tray, Add, Quit, Quit
 }
+
+
 
 
 ;/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\
@@ -1185,7 +1190,9 @@ IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
 Return
 
 SelectedSpeach:
-AnnaVoice := Fn_TTSCreateVoice(A_ThisMenuItem)
+SelectedVoice := Fn_TTSCreateVoice(A_ThisMenuItem)
+Settings_TTSVoice = %A_ThisMenuItem%
+IniWrite, %Settings_TTSVoice%, settings.ini, Settings, TTSVoice
 Return
 
 About:
