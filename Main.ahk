@@ -3,6 +3,7 @@
 #Include %A_ScriptDir%\Functions\
 ;Modular Functions
 #Include tts.ahk
+#Include inireadwrite.ahk
 ;Application Specific
 ;None
 
@@ -53,7 +54,17 @@ LoadSettings:
 	IniWrite, %Settings_TTSVoice%, settings.ini, Settings, TTSVoice
 	}
 
+	;If dev settings file exists, load any settings there
+	IfExist, %A_ScriptDir%\Data\Settings_OverRide.ini
+	{
+	Path_ExtraSettings = %A_ScriptDir%\Data\Settings_OverRide.ini
+	Fn_InitializeIni(Path_ExtraSettings)
+	Fn_LoadIni(Path_ExtraSettings)
+	Channel1 = %User_Channel%
+	}
+
 Sb_GlobalVars()
+
 SetTimer, Hourly, 3600000 ;Creates Hourly Timer
 
 
@@ -1100,7 +1111,6 @@ global
 	If (Settings_TTS = 1) {
 		;Cut http://*  or https://* out
 		TTSVar := RegexReplace(TTSVar, "\bhttps?:\/\/\S*", "")
-		
 		;Send to TTS
 		Fn_TTS(SelectedVoice, "Speak", TTSVar)
 	}
@@ -1207,8 +1217,8 @@ Return
 ; Timers
 ;\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/--\--/
 Hourly:
-CreateArchiveDir()
 FormatTime, Time_Day,, MM/dd
+CreateArchiveDir()
 Return
 
 ;************************
