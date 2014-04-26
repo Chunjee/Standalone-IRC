@@ -1099,7 +1099,7 @@ global
 
 	If (Settings_TTS = 1) {
 		;Cut http://*  or https://* out
-		TTSVar := RegexReplace(TTSVar, "\bhttps?:\/\/\S*\b", "")
+		TTSVar := RegexReplace(TTSVar, "\bhttps?:\/\/\S*", "")
 		
 		;Send to TTS
 		Fn_TTS(SelectedVoice, "Speak", TTSVar)
