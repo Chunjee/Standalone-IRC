@@ -4,6 +4,7 @@
 ;Modular Functions
 #Include tts.ahk
 #Include inireadwrite.ahk
+#Include anchor.ahk
 ;Application Specific
 ;None
 
@@ -110,7 +111,7 @@ Gui, 80: Add, Button, x643 y474 w50 h20 gSendText vSender +Default, Send
 	} Else {
 	Gui, 80: Add, CheckBox, x763 y474 w70 h20 gToggleTimeStamp, Timestamp
 	}
-
+;Gui, 80:  +Resize -MaximizeBox
 ;Gui, 80: Add, Button, +BackgroundTrans x700 yp vCloseConvo gCloseConvo, Close Tab
 
 
@@ -1109,8 +1110,10 @@ Fn_TTSCheck(TTSVar)
 global
 
 	If (Settings_TTS = 1) {
-		;Cut http://*  or https://* out
+		;Cut out http://*, https://*, and www. before sending to TTS
 		TTSVar := RegexReplace(TTSVar, "\bhttps?:\/\/\S*", "")
+		TTSVar := RegexReplace(TTSVar, "www.\S*", "")
+		
 		;Send to TTS
 		Fn_TTS(SelectedVoice, "Speak", TTSVar)
 	}
@@ -1198,6 +1201,10 @@ else
 Settings_TimeStamp = 1
 }
 IniWrite, %Settings_TimeStamp%, settings.ini, Settings, TimeStamp
+Return
+
+GuiSize:
+Anchor(Scrot Chat,"","")
 Return
 
 SelectedSpeach:
